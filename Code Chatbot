@@ -1,0 +1,65 @@
+import nltk
+import re
+from nltk.chat.util import Chat, reflections
+import tkinter as tk
+from tkinter import scrolledtext
+
+# Define response patterns
+pairs = [
+    [r"my name is (.*)", ["Hello %1, how can I help you?"]],
+    [r"hi|hello|hey", ["Hello!", "Hi there!", "Hey!"]],
+    [r"what is your name?", ["I'm a chatbot created to assist you."]],
+    [r"how are you?", ["I'm just a computer program, but thanks for asking!"]],
+    [r"sorry (.*)", ["No worries!"]],
+    [r"i'm (.*) doing good", ["Glad to hear that!"]],
+    [r"quit", ["Bye! Take care."]],
+    [r"(.*)", ["I didn't quite understand that. Could you rephrase?"]],
+]
+
+# Initialize chatbot
+chat = Chat(pairs, reflections)
+
+# Function to handle sending a message and getting a response
+def send_message():
+    user_input = user_entry.get()
+    if user_input.strip():  # Check if input is not empty
+        # Insert user message
+        chat_area.config(state="normal")  # Enable chat area to insert text
+        chat_area.insert(tk.END, "You: " + user_input + "\n")
+        chat_area.config(state="disabled")  # Disable chat area after inserting text
+        chat_area.see(tk.END)  # Scroll to the end
+        user_entry.delete(0, tk.END)  # Clear entry widget
+
+        if user_input.lower() == "quit":
+            response = "Bye! Have a great day."
+            chat_area.config(state="normal")
+            chat_area.insert(tk.END, "Chatbot: " + response + "\n")
+            chat_area.config(state="disabled")
+            chat_area.see(tk.END)
+            root.after(2000, root.quit)  # Exit after showing goodbye message
+        else:
+            response = chat.respond(user_input)
+            chat_area.config(state="normal")
+            chat_area.insert(tk.END, "Chatbot: " + response + "\n")
+            chat_area.config(state="disabled")
+            chat_area.see(tk.END)  # Scroll to the end
+
+# Setting up the tkinter GUI
+root = tk.Tk()
+root.title("Chatbot")
+root.geometry("800x600")
+
+# Chat area for conversation display
+chat_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, state="disabled", height=20)
+chat_area.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+
+# Entry field for user input
+user_entry = tk.Entry(root, width=50)
+user_entry.pack(pady=10)
+
+# Send button
+send_button = tk.Button(root, text="Send", command=send_message)
+send_button.pack()
+
+# Run the GUI
+root.mainloop()
